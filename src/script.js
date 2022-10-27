@@ -28,7 +28,7 @@ async function search() {
         // loop through array and remove each item with pop()
         while (nodes.length > 0) {
             nodes.pop();
-}
+        }
 
         document.getElementById("searchquery").innerHTML = document.getElementById("sterm").value.toString();
         let searchString = '("tractor"[All Fields] OR "tractors"[All Fields]) AND ("accidence"[All Fields] OR "accident s"[All Fields] OR "accidents"[MeSH Terms] OR "accidents"[All Fields] OR "accident"[All Fields])'; // Get from Form
