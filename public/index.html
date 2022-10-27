@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="styles.css">
+        <title>Small World finder</title>
+
+
+    <div>
+        <img class="logo" src="logo.png">
+        <h1> einfach Zitationen suchen </h1>
+        <h1 id="searchquery"> Sie suchen nach: ....</h2>
+    </div>
+
+    
+        <label for="graphbase">Wählen sie basierend auf welchen Zitationen der Graph erstellt wird:</label>
+        <select name="base" id="graphbase">
+            <option value="cited_by">Cited by</option>
+            <option value="cited_by-Clin">Cited by-Clin</option>
+        </select>
+        <br>
+        <label> Laden Sie ein Liste von PMIDs oder ein CSV hoch:</label> <button class = "button" onClick="onClickHandler(event)">File upload</button>
+    </head>
+    <body>
+        <br>
+        <br>
+        <button id="filter-button" class="button">Filter</button> 
+        <br>
+        <br>
+    <div>
+        <input type="text" id="sterm" name="search" value="tractor accidents">
+        <button id="btnsend" onclick="search()" class="buttonsend">Suchen</button>
+        <br>
+    </div>
+        <svg width="600" height="550"></svg>
+
+        <h2>Resultate</h2> <label id="nresults" > </label>
+        <ul id="output"></ul>
+    </body>
+    </html>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="/src/script.js"></script>
+
+    <script>
+
+    var input = document.querySelectorAll("input");
+
+    //Erstelle ein Eventlistener für eine Taste (gedrückt)
+    window.onkeyup = keyup;
+
+    function keyup(e) {
+    //listens for you to press the ENTER key, at which point your web address will change to the one you have input in the search box
+    if (e.keyCode == 13) {
+        console.log();
+        document.getElementById("searchquery").innerHTML = e.target.value.toString();
+        search();
+
+    }
+}
+
+</script>
+
+
+<!---->

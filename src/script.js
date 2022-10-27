@@ -1,0 +1,262 @@
+//Listen und Maps für den späteren Gebrauch
+let pmidList = [];
+let sekList = [];
+const authorList = [];
+const citidList = [];
+let articles = [];
+
+
+const mapArtCit = new Map();
+const mapAuthors = new Map();
+const mapArticles = new Map();
+
+const nodes = [];
+const childnodes = [];
+const links = [];
+const citedby = [];
+
+const directedlinks = [];
+
+
+async function search() {
+    try {
+        //Variabeln zurücksetzen 
+        // set the length to 0
+        nodes.length = 0;
+        // use splice to remove all items
+        nodes.splice(0, nodes.length);
+        // loop through array and remove each item with pop()
+        while (nodes.length > 0) {
+            nodes.pop();
+}
+
+        document.getElementById("searchquery").innerHTML = document.getElementById("sterm").value.toString();
+        let searchString = '("tractor"[All Fields] OR "tractors"[All Fields]) AND ("accidence"[All Fields] OR "accident s"[All Fields] OR "accidents"[MeSH Terms] OR "accidents"[All Fields] OR "accident"[All Fields])'; // Get from Form
+        pmidList = [];
+        let pubMedSearch = await searchPubMedData(searchString);
+        let pubMedData = await fetchPubMedData(pubMedSearch);
+        renderPubMedDataAsList(pubMedData);
+        let iCiteData = await getICiteData(pubMedData.result.uids);
+        let data = combineData(pubMedData, iCiteData);
+        console.log("JSON created:",data);
+        showGraph(data);
+    } catch(e) {
+        console.log(e)
+    }
+}
+
+
+async function searchPubMedData(searchString) {
+    let data = await $.ajax({
+        type: 'GET',
+        url: 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi',
+        data: {
+            db: 'pubmed',
+            usehistory: 'y',
+            term: searchString,
+            retmode: 'json',
+            retmax: 500
+        }
+    });
+    console.log("searchPubMedData", data);
+    //pmidList =  data.esearchresult.idlist;
+    //console.log("IdList", pmidList);
+    const nres = document.getElementById("nresults");
+    nres.textContent = data.esearchresult.count.toString() + " Artikel gefunden:";
+    return data;
+}
+
+async function fetchPubMedData(searchResponse) {
+    let data = await $.ajax({
+        type: 'GET',
+        url: 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi',
+        data: {
+            db: 'pubmed',
+            usehistory: 'y',
+            webenv: searchResponse.esearchresult.webenv,
+            query_key: searchResponse.esearchresult.querykey,
+            retmode: 'json',
+            retmax: 500 // how many items to return
+        }
+    });
+    console.log("fetchPubMedData", data);
+    return data;
+}
+
+function renderPubMedDataAsList(pubMedData) {
+    let output = $('#output');
+    $.each(pubMedData.result, function (i, article) {
+        let item = $('<li/>').appendTo(output);
+        let container = $('<div/>').appendTo(item);
+        pmidList.push(article.uid);
+        //Publikationsdatum und Journalname
+        $('<label/>', {
+            text: article.pubdate + " | " +  article.fulljournalname
+        }).appendTo(item);
+        //PMID +Titel + Link zum Artikel
+        $('<a/>', {
+            href: "https://pubmed.ncbi.nlm.nih.gov/" +article.pmid,
+            text: article.uid + " | " + article.title,
+        }).appendTo(container);
+        //Autoren
+        /*
+        let authorJSON = JSON.stringify(article.authors);
+        let autoren = "";
+        if(article.authors > 0){
+            $.each(article.authors, function(i, author){
+                autoren += authorJSON.name[i] + ", ";
+            });
+        }
+        */
+        $('<div/>', {
+            text: JSON.stringify(article.authors)
+        }).appendTo(item);
+        //Trennlinie
+        $('<hr width="98%" align="center" height="25px" background-color="blue">').appendTo(item);
+    });
+}
+
+async function getICiteData(pmidList) {
+    let query = "";
+    query = pmidList.toString();
+    let data = await $.ajax({
+            method : "GET",
+            url: "https://icite.od.nih.gov/api/pubs?pmids=" + query,
+            
+    })
+    console.log("getICiteData", data.data);
+    data.data.forEach(article => {
+        //console.log(article);
+        //Doppelte Menge an Nodes als gewollt
+        nodes.push([{id : article.pmid},{group: "1"}]);
+        //Überprüfung, ob die Referenzenliste leer ist
+        if(article.cited_by.length != 0) {
+            
+            //Überprüfung, ob die PMID der Referenz undefiniert ist
+            for(i = 0; i <= article.cited_by.length; i++ ){
+                citidList.push((article.cited_by[i]));
+                if(article.cited_by[i] != undefined)
+                    if(pmidList.includes(article.cited_by[i])){
+                        directedlinks([{target : article.pmid}, {source : article.cited_by[i]}]);
+                    }
+                    links.push([{target : article.pmid}, {source : article.cited_by[i]}]);
+                    nodes.push({id : article.cited_by[i]},{group: "2"})
+                    citedby.push([article.pmid, article.cited_by]);
+            }
+            
+        }
+    });
+    console.log("Cited_by", citedby);
+    console.log("Nodes created:", nodes);
+    console.log("Links created:", links);
+    console.log("New PMIDS: ", citidList);
+    //undefinierte neue PMIDS darunter
+    return data;
+}
+
+
+function combineData(pubData, iCiteData){
+    const data = {
+        nodes: nodes,
+        links: links
+    }
+    
+    JSON.stringify(data)
+    nodes.push()
+    data.nodes.push()
+    
+    return JSON.stringify({nodes: nodes, links: links})
+}
+
+function showGraph(data) {
+    let svg = d3.select("svg"),
+    width = +svg.attr("width"),
+    height = +svg.attr("height");
+
+    let color = d3.scaleOrdinal(d3.schemeCategory20);
+
+    let simulation = d3.forceSimulation()
+        .force("link", d3.forceLink().id(function(d) { return d.id; }))
+        .force("charge", d3.forceManyBody())
+        .force("center", d3.forceCenter(width / 2, height / 2));
+
+    d3.json("miserables.json", function(error, graph) {
+    if (error) throw error;
+
+    let link = svg.append("g")
+        .attr("class", "links")
+        .selectAll("line")
+        .data(graph.links)
+        .enter().append("line")
+        .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
+
+    let node = svg.append("g")
+        .attr("class", "nodes")
+        .selectAll("g")
+        .data(graph.nodes)
+        .enter().append("g")
+
+    let circles = node.append("circle")
+        .attr("r", 5)
+        .attr("fill", function(d) { return color(d.group); });
+
+    // Create a drag handler and append it to the node object instead
+    let drag_handler = d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended);
+
+    drag_handler(node);
+    
+    let lables = node.append("text")
+        .text(function(d) {
+            return d.id;
+        })
+        .attr('x', 6)
+        .attr('y', 3);
+
+    node.append("title")
+        .text(function(d) { return d.id; });
+
+    simulation
+        .nodes(graph.nodes)
+        .on("tick", ticked);
+
+    simulation.force("link")
+        .links(graph.links);
+
+    
+        function ticked() {
+            link
+                .attr("x1", function(d) { return d.source.x; })
+                .attr("y1", function(d) { return d.source.y; })
+                .attr("x2", function(d) { return d.target.x; })
+                .attr("y2", function(d) { return d.target.y; });
+            node
+                .attr("transform", function(d) {
+                return "translate(" + d.x + "," + d.y + ")";
+                })
+        }
+        function dragstarted(d) {
+            if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+        
+            function dragged(d) {
+            d.fx = d3.event.x;
+            d.fy = d3.event.y;
+        }
+        
+            function dragended(d) {
+            if (!d3.event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        } 
+    });
+       
+}
+
+
+
+
