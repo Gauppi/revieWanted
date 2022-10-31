@@ -27,11 +27,11 @@
 
         
         <div id="filterbtnContainer">
-            <button class="btnactive" onclick="filterSelection('all')"> Filter</button>
-            <button class="btnf" onclick="filterSelection('publikationszeitpunkt')"> Publikationszeitpunkt</button>
-            <button class="btnf" onclick="filterSelection('impactfactor')"> Impact factor</button>
-            <button class="btnf" onclick="filterSelection('sprache')"> Sprache</button>
-            <button class="btnf" onclick="filterSelection('textverfügbarkeit')">TextverfügbarkeitColors</button>
+            <button class="btnactive" onclick="onClickFilter()"> Alle Filter</button>
+            <button class="btnf" id = "btndate" onclick="filterSelection('publikationszeitpunkt')"> Publikationszeitpunkt</button>
+            <button class="btnf" id = "btnimp" onclick="filterSelection('impactfactor')"> Impact factor</button>
+            <button class="btnf" id = "btnsprache" onclick="filterSelection('sprache')"> Sprache</button>
+            <button class="btnf" id = "btntext" onclick="filterSelection('textverfügbarkeit')">TextverfügbarkeitColors</button>
         </div> 
         <!-- The filterable elements. Note that some have multiple class names (this can be used if they belong to multiple categories) -->
         <div class="filtercontainer">
@@ -53,6 +53,7 @@
         <br>
         <br>
     <div>
+        <label> PubMed (Advanced) Searchquery: </label>
         <input type="text" id="sterm" name="search" value="tractor accidents">
         <button id="btnsend" onclick="search()" class="buttonsend">Suchen</button>
         <br>
@@ -84,7 +85,14 @@
     }
 }
 
-    filterSelection("all")
+    function onClickFilter(){
+        document.getElementById("btndate").style.visibility = "visible";
+        document.getElementById("btnimp").style.visibility = "visible";
+        document.getElementById("btnsprache").style.visibility = "visible";
+        document.getElementById("btntext").style.visibility = "visible";
+        filterSelection("all");
+        
+    }
 
     function filterSelection(c) {
     let x, i;

@@ -33,13 +33,17 @@ async function search() {
         document.getElementById("searchquery").innerHTML = document.getElementById("sterm").value.toString();
         let searchString = '("tractor"[All Fields] OR "tractors"[All Fields]) AND ("accidence"[All Fields] OR "accident s"[All Fields] OR "accidents"[MeSH Terms] OR "accidents"[All Fields] OR "accident"[All Fields])'; // Get from Form
         pmidList = [];
+        sekList = [];
         let pubMedSearch = await searchPubMedData(searchString);
         let pubMedData = await fetchPubMedData(pubMedSearch);
         renderPubMedDataAsList(pubMedData);
         let iCiteData = await getICiteData(pubMedData.result.uids);
-        let data = combineData(pubMedData, iCiteData);
+        console.log("PMID Liste zitierter Artikel:", sekList);
+        let iCiteData2 = await getICiteData2(sekList);
+        let data = combineData(iCiteData, iCiteData2);
         console.log("JSON created:",data);
-        showGraph(data);
+        console.log("directed Links: ", directedlinks);
+        //showGraph(data);
     } catch(e) {
         console.log(e)
     }
@@ -60,7 +64,6 @@ async function searchPubMedData(searchString) {
     });
     console.log("searchPubMedData", data);
     //pmidList =  data.esearchresult.idlist;
-    //console.log("IdList", pmidList);
     const nres = document.getElementById("nresults");
     nres.textContent = data.esearchresult.count.toString() + " Artikel gefunden:";
     return data;
@@ -114,6 +117,7 @@ function renderPubMedDataAsList(pubMedData) {
         //Trennlinie
         $('<hr width="98%" align="center" height="25px" background-color="blue">').appendTo(item);
     });
+    console.log("IdList", pmidList);
 }
 
 async function getICiteData(pmidList) {
@@ -127,21 +131,22 @@ async function getICiteData(pmidList) {
     console.log("getICiteData", data.data);
     data.data.forEach(article => {
         //console.log(article);
-        //Doppelte Menge an Nodes als gewollt
         nodes.push([{id : article.pmid},{group: "1"}]);
         //Überprüfung, ob die Referenzenliste leer ist
         if(article.cited_by.length != 0) {
             
             //Überprüfung, ob die PMID der Referenz undefiniert ist
             for(i = 0; i <= article.cited_by.length; i++ ){
-                citidList.push((article.cited_by[i]));
-                if(article.cited_by[i] != undefined)
-                    if(pmidList.includes(article.cited_by[i])){
-                        directedlinks([{target : article.pmid}, {source : article.cited_by[i]}]);
+                //citidList.push((article.cited_by[i]));
+                if(article.cited_by[i] != undefined){
+                    if(pmidList.includes(article.cited_by[i].toString())){
+                        directedlinks.push([{target : article.pmid}, {source : article.cited_by[i]}]);
                     }
                     links.push([{target : article.pmid}, {source : article.cited_by[i]}]);
-                    nodes.push({id : article.cited_by[i]},{group: "2"})
-                    citedby.push([article.pmid, article.cited_by]);
+                    citedby.push([article.pmid, article.cited_by[i]]);
+                    sekList.push(article.cited_by[i]);                      
+                }
+                    
             }
             
         }
@@ -149,7 +154,6 @@ async function getICiteData(pmidList) {
     console.log("Cited_by", citedby);
     console.log("Nodes created:", nodes);
     console.log("Links created:", links);
-    console.log("New PMIDS: ", citidList);
     //undefinierte neue PMIDS darunter
     return data;
 }
@@ -166,6 +170,33 @@ function combineData(pubData, iCiteData){
     data.nodes.push()
     
     return JSON.stringify({nodes: nodes, links: links})
+}
+
+function sliceIntoChunks(arr, chunkSize) {
+    const res = [];
+    for(let i = 0; i  < Math.floor(arr.length / chunkSize); i++){
+        const chunk = arr.slice(i, i + chunkSize);
+        console.log(i, " chunk:", chunk);
+        res.push(chunk);
+    }
+    return res;
+}
+
+async function getICiteData2(idlist) {
+    let data;
+    console.log("List of PMIDs; ", idlist)
+    if(idlist.length > 999){
+        let subquery = sliceIntoChunks(idlist, 1000);
+        console.log(subquery);
+        for(let i = 0; i < Math.floor(subquery.length / 1000); i++){
+            data = await getICiteData(subquery[i]);
+            console.log(data);
+        }
+    }
+    else{
+        data = await getICiteData(idlist);
+    }
+    return data;
 }
 
 function showGraph(data) {
