@@ -1,3 +1,4 @@
+
 //Listen und Maps für den späteren Gebrauch
 let pmidList = [];
 let sekList = [];
@@ -44,6 +45,12 @@ async function search() {
         console.log("JSON created:",data);
         console.log("directed Links: ", directedlinks);
         showGraph(data);
+       
+
+        const a1 = document.getElementById("a1");
+        const file = new Blob([data], {type: "text/plain"})
+        a1.href = URL.createObjectURL(file);
+        return data;
     } catch(e) {
         console.log(e)
     }
@@ -199,6 +206,36 @@ async function getICiteData2(idlist) {
     return data;
 }
 
+
+function OBJtoXML(obj) {
+    var xml = '';
+    for (var prop in obj) {
+        xml += "<" + prop + ">";
+        if(Array.isArray(obj[prop])) {
+            for (var array of obj[prop]) {
+
+                // A real botch fix here
+                xml += "</" + prop + ">";
+                xml += "<" + prop + ">";
+
+                xml += OBJtoXML(new Object(array));
+            }
+        } else if (typeof obj[prop] == "object") {
+            xml += OBJtoXML(new Object(obj[prop]));
+        } else {
+            xml += obj[prop];
+        }
+        xml += "</" + prop + ">";
+    }
+    var xml = xml.replace(/<\/?[0-9]{1,}>/g,'');
+    return xml
+}
+
+function save(xml){
+    var gephiXML = new gephiXML([xml], {type: "text/xml"});
+    saveAs(gephiXML, "gephiXML.xml");
+}
+
 function showGraph(data) {
     var svg = d3.select("svg"),
     width = +svg.attr("width"),
@@ -269,23 +306,25 @@ function showGraph(data) {
             })
         }
     });
-}
-function dragstarted(d) {
-    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-    d.fx = d.x;
-    d.fy = d.y;
+
+    function dragstarted(d) {
+        if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+    }
+    
+    function dragged(d) {
+        d.fx = d3.event.x;
+        d.fy = d3.event.y;
+    }
+    
+    function dragended(d) {
+        if (!d3.event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+    }
 }
 
-function dragged(d) {
-    d.fx = d3.event.x;
-    d.fy = d3.event.y;
-}
-
-function dragended(d) {
-    if (!d3.event.active) simulation.alphaTarget(0);
-    d.fx = null;
-    d.fy = null;
-}
     
 
 

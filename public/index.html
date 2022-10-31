@@ -55,18 +55,21 @@
     <div>
         <label> PubMed (Advanced) Searchquery: </label>
         <input type="text" id="sterm" name="search" value="tractor accidents">
-        <button id="btnsend" onclick="search()" class="buttonsend">Suchen</button>
+        <button id="btnsend" onclick="search()" class="button">Suchen</button>
         <br>
     </div>
         <svg width="960" height="600"></svg>
         <script src="https://d3js.org/d3.v4.min.js"></script>
         <h2>Resultate</h2> <label id="nresults" > </label>
+        <a id="a1" download="file.xml"> Export result</a>
+        <button id="btnsave" onclick="save()" class="button">Exportieren</button>
         <ul id="output"></ul>
     </body>
     </html>
     
     <script src="https://code.jquery.com/jquery-latest.min.js"></script>
     <script src="/src/script.js"></script>
+    <script src="/src/xml2json.js"></script>
 
     <script>
 
@@ -80,7 +83,9 @@
     if (e.keyCode == 13) {
         console.log();
         document.getElementById("searchquery").innerHTML = e.target.value.toString();
-        search();
+        let res = search();
+        convert2XML(res);
+        
 
     }
 }
@@ -139,6 +144,14 @@
         current[0].className = current[0].className.replace(" active", "");
         this.className += " active";
     });
+    }
+
+    function convert2XML(data){
+        // Create x2js instance with default config
+        var x2js = new X2JS();
+        var xmlAsStr = x2js.json2xml_str( data );
+
+        console.log("XML-Objext: ", xmlAsStr);
     }
 
 </script>
