@@ -1,19 +1,15 @@
 
-//Listen und Maps für den späteren Gebrauch
+//Listen für den späteren Gebrauch
 let pmidList = [];
 let sekList = [];
 const authorList = [];
 const citidList = [];
 let articles = [];
 
-
-const mapArtCit = new Map();
-const mapAuthors = new Map();
-const mapArticles = new Map();
-
 const nodes = [];
+const nodesdata = [];
 const childnodes = [];
-const links = [];
+const edges = [];
 const citedby = [];
 
 const directedlinks = [];
@@ -45,7 +41,7 @@ async function search() {
         console.log("JSON created:",data);
         console.log("directed Links: ", directedlinks);
         showGraph(data);
-       
+       OBJtoXML(data);
 
         const a1 = document.getElementById("a1");
         const file = new Blob([data], {type: "text/plain"})
@@ -139,6 +135,9 @@ async function getICiteData(pmidList) {
     data.data.forEach(article => {
         //console.log(article);
         nodes.push([{id : article.pmid},{group: "1"}]);
+        //Weitere Attribute mitgeben
+        nodesdata.push([{key : "n0"}]);
+
         //Überprüfung, ob die Referenzenliste leer ist
         if(article.cited_by.length != 0) {
             
@@ -149,7 +148,7 @@ async function getICiteData(pmidList) {
                     if(pmidList.includes(article.cited_by[i].toString())){
                         directedlinks.push([{target : article.pmid}, {source : article.cited_by[i]}]);
                     }
-                    links.push([{target : article.pmid}, {source : article.cited_by[i]}]);
+                    edges.push([{target: article.pmid},{source: article.cited_by[i]}]);
                     citedby.push([article.pmid, article.cited_by[i]]);
                     sekList.push(article.cited_by[i]);                      
                 }
@@ -160,24 +159,23 @@ async function getICiteData(pmidList) {
     });
     console.log("Cited_by", citedby);
     console.log("Nodes created:", nodes);
-    console.log("Links created:", links);
-    //undefinierte neue PMIDS darunter
+    console.log("Edges created:", edges);
     return data;
 }
 
 
 function combineData(pubData, iCiteData){
     const data = {
-        nodes: nodes,
-        links: links
+        nodes: [nodes, nodesdata],
+        edges: edges
     }
     
-    JSON.stringify(data)
-    nodes.push()
-    data.nodes.push()
-    
-    return JSON.stringify({nodes: nodes, links: links})
+    let res = JSON.stringify(data)
+    //nodes.push()
+    data.nodes.push(res)
+    return JSON.stringify({nodes: nodes, edges: edges})
 }
+
 
 function sliceIntoChunks(arr, chunkSize) {
     const res = [];
@@ -210,24 +208,21 @@ async function getICiteData2(idlist) {
 function OBJtoXML(obj) {
     var xml = '';
     for (var prop in obj) {
-        xml += "<" + prop + ">";
-        if(Array.isArray(obj[prop])) {
-            for (var array of obj[prop]) {
-
-                // A real botch fix here
-                xml += "</" + prop + ">";
-                xml += "<" + prop + ">";
-
-                xml += OBJtoXML(new Object(array));
-            }
-        } else if (typeof obj[prop] == "object") {
-            xml += OBJtoXML(new Object(obj[prop]));
-        } else {
-            xml += obj[prop];
+      xml += obj[prop] instanceof Array ? '' : "<" + prop + ">";
+      if (obj[prop] instanceof Array) {
+        for (var array in obj[prop]) {
+          xml += "<" + prop + ">";
+          xml += OBJtoXML(new Object(obj[prop][array]));
+          xml += "</" + prop + ">";
         }
-        xml += "</" + prop + ">";
+      } else if (typeof obj[prop] == "object") {
+        xml += OBJtoXML(new Object(obj[prop]));
+      } else {
+        xml += obj[prop];
+      }
+      xml += obj[prop] instanceof Array ? '' : "</" + prop + ">";
     }
-    var xml = xml.replace(/<\/?[0-9]{1,}>/g,'');
+    var xml = xml.replace(/<\/?[0-9]{1,}>/g, '');
     return xml
 }
 
