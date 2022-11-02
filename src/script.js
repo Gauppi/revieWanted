@@ -28,7 +28,7 @@ async function search() {
         }
 
         document.getElementById("searchquery").innerHTML = document.getElementById("sterm").value.toString();
-        let searchString = '("tractor"[All Fields] OR "tractors"[All Fields]) AND ("accidence"[All Fields] OR "accident s"[All Fields] OR "accidents"[MeSH Terms] OR "accidents"[All Fields] OR "accident"[All Fields])'; // Get from Form
+        let searchString = '("medical informatics"[MeSH Terms] OR ("medical"[All Fields] AND "informatics"[All Fields]) OR "medical informatics"[All Fields]) AND ("social behavior"[MeSH Terms] OR ("social"[All Fields] AND "behavior"[All Fields]) OR "social behavior"[All Fields] OR "sociality"[All Fields] OR "social"[All Fields] OR "socialisation"[All Fields] OR "socialization"[MeSH Terms] OR "socialization"[All Fields] OR "socialise"[All Fields] OR "socialised"[All Fields] OR "socialising"[All Fields] OR "socialities"[All Fields] OR "socializations"[All Fields] OR "socialize"[All Fields] OR "socialized"[All Fields] OR "socializers"[All Fields] OR "socializes"[All Fields] OR "socializing"[All Fields] OR "socially"[All Fields] OR "socials"[All Fields]) AND ("longitudinal"[All Fields] OR "longitudinally"[All Fields]) AND ("network"[All Fields] OR "network s"[All Fields] OR "networked"[All Fields] OR "networker"[All Fields] OR "networkers"[All Fields] OR "networking"[All Fields] OR "networks"[All Fields]) AND ("analysis"[MeSH Subheading] OR "analysis"[All Fields]) AND ("research personnel"[MeSH Terms] OR ("research"[All Fields] AND "personnel"[All Fields]) OR "research personnel"[All Fields] OR "researcher"[All Fields] OR "researchers"[All Fields] OR "research"[MeSH Terms] OR "research"[All Fields] OR "research s"[All Fields] OR "researchable"[All Fields] OR "researche"[All Fields] OR "researched"[All Fields] OR "researcher s"[All Fields] OR "researches"[All Fields] OR "researching"[All Fields] OR "researchs"[All Fields]) AND ("journal s"[All Fields] OR "journalism"[MeSH Terms] OR "journalism"[All Fields] OR "periodicals as topic"[MeSH Terms] OR ("periodicals"[All Fields] AND "topic"[All Fields]) OR "periodicals as topic"[All Fields] OR "journals"[All Fields])' //'("tractor"[All Fields] OR "tractors"[All Fields]) AND ("accidence"[All Fields] OR "accident s"[All Fields] OR "accidents"[MeSH Terms] OR "accidents"[All Fields] OR "accident"[All Fields])'; // Get from Form
         pmidList = [];
         sekList = [];
         let pubMedSearch = await searchPubMedData(searchString);
@@ -40,7 +40,7 @@ async function search() {
         let data = combineData(iCiteData, iCiteData2);
         console.log("JSON created:",data);
         console.log("directed Links: ", directedlinks);
-        showGraph(data);
+        showGraph(JSON.parse(data));
        OBJtoXML(data);
 
         const a1 = document.getElementById("a1");
@@ -134,7 +134,7 @@ async function getICiteData(pmidList) {
     console.log("getICiteData", data.data);
     data.data.forEach(article => {
         //console.log(article);
-        nodes.push([{id : article.pmid},{group: "1"}]);
+        nodes.push({id : article.pmid,group: "1"});
         //Weitere Attribute mitgeben
         nodesdata.push([{key : "n0"}]);
 
@@ -146,10 +146,11 @@ async function getICiteData(pmidList) {
                 //citidList.push((article.cited_by[i]));
                 if(article.cited_by[i] != undefined){
                     if(pmidList.includes(article.cited_by[i].toString())){
-                        directedlinks.push([{target : article.pmid}, {source : article.cited_by[i]}]);
+                        directedlinks.push({target : article.pmid, source : article.cited_by[i]});
                     }
-                    edges.push([{target: article.pmid},{source: article.cited_by[i]}]);
-                    citedby.push([article.pmid, article.cited_by[i]]);
+                    nodes.push({id :  article.cited_by[i], group: "2"});
+                    edges.push({target: article.pmid, source: article.cited_by[i], value: 1});
+                    citedby.push(article.pmid, article.cited_by[i]);
                     sekList.push(article.cited_by[i]);                      
                 }
                     
@@ -173,7 +174,7 @@ function combineData(pubData, iCiteData){
     let res = JSON.stringify(data)
     //nodes.push()
     data.nodes.push(res)
-    return JSON.stringify({nodes: nodes, edges: edges})
+    return JSON.stringify({nodes: nodes, links: edges})
 }
 
 
@@ -235,6 +236,15 @@ function showGraph(data) {
     var svg = d3.select("svg"),
     width = +svg.attr("width"),
     height = +svg.attr("height");
+    
+    var svg = d3.select("#dataviz_basicZoom")
+    .append("svg")
+        .attr("width",  1500)
+        .attr("height",  1000)
+        .call(d3.zoom().on("zoom", function () {
+        svg.attr("transform", d3.event.transform)
+        }))
+    .append("g")
 
     var color = d3.scaleOrdinal(d3.schemeCategory20);
 
@@ -319,6 +329,7 @@ function showGraph(data) {
         d.fy = null;
     }
 }
+
 
     
 
