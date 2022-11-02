@@ -7,7 +7,7 @@
 
     <div>
         <img class="logo" src="logo.png">
-        <h1> einfach Zitationen suchen </h1>
+        <p> einfach Zitationen suchen </p>
         <h1 id="searchquery"> Sie suchen nach: ....</h2>
     </div>
 
@@ -52,17 +52,18 @@
         
         <br>
         <br>
-    <div>
         <label> PubMed (Advanced) Searchquery: </label>
-        <input type="text" id="sterm" name="search" value="tractor accidents">
-        <button id="btnsend" onclick="search()" class="button">Suchen</button>
         <br>
-    </div>
-        <svg width="960" height="600"></svg>
+        <input type="text" id="sterm" class="inputsearch" name="search" value="tractor accidents">
+        <button id="btnsend" onclick="search()" class="button" role="button">Suchen</button>
+        <br>
+        <br>
+        <div id="dataviz_basicZoom" class="center">
+            <svg></svg>
+        </div>
         <script src="https://d3js.org/d3.v4.min.js"></script>
         <h2>Resultate</h2> <label id="nresults" > </label>
-        <a id="a1" download="file.xml"> Export result</a>
-        <button id="btnsave" onclick="save()" class="button">Exportieren</button>
+        <a id="a1" download="file.json"> Export result</a>
         <ul id="output"></ul>
     </body>
     </html>

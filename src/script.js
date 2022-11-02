@@ -28,7 +28,7 @@ async function search() {
         }
 
         document.getElementById("searchquery").innerHTML = document.getElementById("sterm").value.toString();
-        let searchString = '("tractor"[All Fields] OR "tractors"[All Fields]) AND ("accidence"[All Fields] OR "accident s"[All Fields] OR "accidents"[MeSH Terms] OR "accidents"[All Fields] OR "accident"[All Fields])'; // Get from Form
+        let searchString = '("video s"[All Fields] OR "videoed"[All Fields] OR "videotape recording"[MeSH Terms] OR ("videotape"[All Fields] AND "recording"[All Fields]) OR "videotape recording"[All Fields] OR "video"[All Fields] OR "videos"[All Fields]) AND ("game s"[All Fields] OR "games"[All Fields] OR "gaming"[All Fields]) AND ("addict"[All Fields] OR "addict s"[All Fields] OR "addicted"[All Fields] OR "addicting"[All Fields] OR "addiction s"[All Fields] OR "addictive"[All Fields] OR "addictiveness"[All Fields] OR "addictives"[All Fields] OR "addicts"[All Fields] OR "behavior, addictive"[MeSH Terms] OR ("behavior"[All Fields] AND "addictive"[All Fields]) OR "addictive behavior"[All Fields] OR "addiction"[All Fields] OR "addictions"[All Fields]) AND ("classification"[MeSH Terms] OR "classification"[All Fields] OR "systematic"[All Fields] OR "classification"[MeSH Subheading] OR "systematics"[All Fields] OR "systematical"[All Fields] OR "systematically"[All Fields] OR "systematisation"[All Fields] OR "systematise"[All Fields] OR "systematised"[All Fields] OR "systematization"[All Fields] OR "systematizations"[All Fields] OR "systematize"[All Fields] OR "systematized"[All Fields] OR "systematizes"[All Fields] OR "systematizing"[All Fields])' //'("tractor"[All Fields] OR "tractors"[All Fields]) AND ("accidence"[All Fields] OR "accident s"[All Fields] OR "accidents"[MeSH Terms] OR "accidents"[All Fields] OR "accident"[All Fields])'; // Get from Form
         pmidList = [];
         sekList = [];
         let pubMedSearch = await searchPubMedData(searchString);
@@ -40,7 +40,7 @@ async function search() {
         let data = combineData(iCiteData, iCiteData2);
         console.log("JSON created:",data);
         console.log("directed Links: ", directedlinks);
-        showGraph(data);
+        showGraph(JSON.parse(data));
        OBJtoXML(data);
 
         const a1 = document.getElementById("a1");
@@ -134,7 +134,7 @@ async function getICiteData(pmidList) {
     console.log("getICiteData", data.data);
     data.data.forEach(article => {
         //console.log(article);
-        nodes.push([{id : article.pmid},{group: "1"}]);
+        nodes.push({id : article.pmid,group: "1"});
         //Weitere Attribute mitgeben
         nodesdata.push([{key : "n0"}]);
 
@@ -146,10 +146,11 @@ async function getICiteData(pmidList) {
                 //citidList.push((article.cited_by[i]));
                 if(article.cited_by[i] != undefined){
                     if(pmidList.includes(article.cited_by[i].toString())){
-                        directedlinks.push([{target : article.pmid}, {source : article.cited_by[i]}]);
+                        directedlinks.push({target : article.pmid, source : article.cited_by[i]});
                     }
-                    edges.push([{target: article.pmid},{source: article.cited_by[i]}]);
-                    citedby.push([article.pmid, article.cited_by[i]]);
+                    nodes.push({id :  article.cited_by[i], group: "2"});
+                    edges.push({target: article.pmid, source: article.cited_by[i], value: 1});
+                    citedby.push(article.pmid, article.cited_by[i]);
                     sekList.push(article.cited_by[i]);                      
                 }
                     
@@ -173,7 +174,7 @@ function combineData(pubData, iCiteData){
     let res = JSON.stringify(data)
     //nodes.push()
     data.nodes.push(res)
-    return JSON.stringify({nodes: nodes, edges: edges})
+    return JSON.stringify({nodes: nodes, links: edges})
 }
 
 
@@ -235,6 +236,15 @@ function showGraph(data) {
     var svg = d3.select("svg"),
     width = +svg.attr("width"),
     height = +svg.attr("height");
+    
+    var svg = d3.select("#dataviz_basicZoom")
+    .append("svg")
+        .attr("width",  1800)
+        .attr("height",  1200)
+        .call(d3.zoom().on("zoom", function () {
+        svg.attr("transform", d3.event.transform)
+        }))
+    .append("g")
 
     var color = d3.scaleOrdinal(d3.schemeCategory20);
 
@@ -319,6 +329,7 @@ function showGraph(data) {
         d.fy = null;
     }
 }
+
 
     
 
