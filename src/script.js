@@ -56,7 +56,7 @@ async function search() {
 async function searchPubMedData(searchString) {
     let data = await $.ajax({
         type: 'GET',
-        url: 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi',
+        url: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi',
         data: {
             db: 'pubmed',
             usehistory: 'y',
@@ -75,7 +75,7 @@ async function searchPubMedData(searchString) {
 async function fetchPubMedData(searchResponse) {
     let data = await $.ajax({
         type: 'GET',
-        url: 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi',
+        url: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi',
         data: {
             db: 'pubmed',
             usehistory: 'y',
