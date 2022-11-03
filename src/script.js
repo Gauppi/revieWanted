@@ -30,8 +30,8 @@ async function search() {
             nodes.pop();
         }
 
-        document.getElementById("searchquery").innerHTML = document.getElementById("sterm").value.toString();
-        let searchString = '("video s"[All Fields] OR "videoed"[All Fields] OR "videotape recording"[MeSH Terms] OR ("videotape"[All Fields] AND "recording"[All Fields]) OR "videotape recording"[All Fields] OR "video"[All Fields] OR "videos"[All Fields]) AND ("game s"[All Fields] OR "games"[All Fields] OR "gaming"[All Fields]) AND ("addict"[All Fields] OR "addict s"[All Fields] OR "addicted"[All Fields] OR "addicting"[All Fields] OR "addiction s"[All Fields] OR "addictive"[All Fields] OR "addictiveness"[All Fields] OR "addictives"[All Fields] OR "addicts"[All Fields] OR "behavior, addictive"[MeSH Terms] OR ("behavior"[All Fields] AND "addictive"[All Fields]) OR "addictive behavior"[All Fields] OR "addiction"[All Fields] OR "addictions"[All Fields]) AND ("classification"[MeSH Terms] OR "classification"[All Fields] OR "systematic"[All Fields] OR "classification"[MeSH Subheading] OR "systematics"[All Fields] OR "systematical"[All Fields] OR "systematically"[All Fields] OR "systematisation"[All Fields] OR "systematise"[All Fields] OR "systematised"[All Fields] OR "systematization"[All Fields] OR "systematizations"[All Fields] OR "systematize"[All Fields] OR "systematized"[All Fields] OR "systematizes"[All Fields] OR "systematizing"[All Fields])' //'("tractor"[All Fields] OR "tractors"[All Fields]) AND ("accidence"[All Fields] OR "accident s"[All Fields] OR "accidents"[MeSH Terms] OR "accidents"[All Fields] OR "accident"[All Fields])'; // Get from Form
+        let searchString = document.getElementById("searchquery").innerHTML = document.getElementById("sterm").value.toString();
+        //let searchString = '("video s"[All Fields] OR "videoed"[All Fields] OR "videotape recording"[MeSH Terms] OR ("videotape"[All Fields] AND "recording"[All Fields]) OR "videotape recording"[All Fields] OR "video"[All Fields] OR "videos"[All Fields]) AND ("game s"[All Fields] OR "games"[All Fields] OR "gaming"[All Fields]) AND ("addict"[All Fields] OR "addict s"[All Fields] OR "addicted"[All Fields] OR "addicting"[All Fields] OR "addiction s"[All Fields] OR "addictive"[All Fields] OR "addictiveness"[All Fields] OR "addictives"[All Fields] OR "addicts"[All Fields] OR "behavior, addictive"[MeSH Terms] OR ("behavior"[All Fields] AND "addictive"[All Fields]) OR "addictive behavior"[All Fields] OR "addiction"[All Fields] OR "addictions"[All Fields]) AND ("classification"[MeSH Terms] OR "classification"[All Fields] OR "systematic"[All Fields] OR "classification"[MeSH Subheading] OR "systematics"[All Fields] OR "systematical"[All Fields] OR "systematically"[All Fields] OR "systematisation"[All Fields] OR "systematise"[All Fields] OR "systematised"[All Fields] OR "systematization"[All Fields] OR "systematizations"[All Fields] OR "systematize"[All Fields] OR "systematized"[All Fields] OR "systematizes"[All Fields] OR "systematizing"[All Fields])' //'("tractor"[All Fields] OR "tractors"[All Fields]) AND ("accidence"[All Fields] OR "accident s"[All Fields] OR "accidents"[MeSH Terms] OR "accidents"[All Fields] OR "accident"[All Fields])'; // Get from Form
         // Arrays zurücksetzen 
         pmidList = [];
         nodes = [];
@@ -55,7 +55,7 @@ async function search() {
         console.log("directed Links: ", directedlinks);
         //Erstellen des force directed Graphes
         showGraph(data);
-
+        
         //XML Parsen 
         let res = OBJtoXML(data);
         console.log(res);
@@ -187,7 +187,6 @@ async function getICiteData(pmidList) {
             
         }
     });
-
     console.log("Reviews found: ", revcnt);
     console.log("Cited_by", citedby);
     console.log("Nodes created:", nodes);
@@ -199,14 +198,10 @@ async function getICiteData(pmidList) {
 
 function combineData(pubData, iCiteData){
     const data = {
-        nodes: [nodes, nodesdata],
+        nodes: nodes,
         edges: edges
     }
-    
-    let res = JSON.stringify(data)
-    //nodes.push()
-    data.nodes.push(res)
-    return JSON.stringify({nodes: nodes, links: edges})
+    return data
 }
 
 
@@ -237,13 +232,12 @@ async function getICiteData2(idlist) {
     return data;
 }
 
-
 function OBJtoXML(obj) {
-    var xml = '';
-    for (var prop in obj) {
+    let xml = '';
+    for (let prop in obj) {
       xml += obj[prop] instanceof Array ? '' : "<" + prop + ">";
       if (obj[prop] instanceof Array) {
-        for (var array in obj[prop]) {
+        for (let array in obj[prop]) {
           xml += "<" + prop + ">";
           xml += OBJtoXML(new Object(obj[prop][array]));
           xml += "</" + prop + ">";
@@ -255,24 +249,24 @@ function OBJtoXML(obj) {
       }
       xml += obj[prop] instanceof Array ? '' : "</" + prop + ">";
     }
-    var xml = xml.replace(/<\/?[0-9]{1,}>/g, '');
+    xml = xml.replace(/<\/?[0-9]{1,}>/g, '');
     return xml
 }
 
 function save(xml){
-    var gephiXML = new gephiXML([xml], {type: "text/xml"});
+    let gephiXML = new gephiXML([xml], {type: "text/xml"});
     saveAs(gephiXML, "gephiXML.xml");
 }
 
-function showGraph(data) {
-    var svg = d3.select("svg"),
+function showGraph(data) {    
+    var svg = d3.select("#dataviz_basicZoom"),
     width = +svg.attr("width"),
     height = +svg.attr("height");
-    
+
     var svg = d3.select("#dataviz_basicZoom")
     .append("svg")
-        .attr("width",  1800)
-        .attr("height",  1200)
+        .attr("width",  800)
+        .attr("height",  1000)
         .call(d3.zoom().on("zoom", function () {
         svg.attr("transform", d3.event.transform)
         }))
@@ -284,21 +278,20 @@ function showGraph(data) {
         .force("link", d3.forceLink().id(function(d) { return d.id; }))
         .force("charge", d3.forceManyBody())
         .force("center", d3.forceCenter(width / 2, height / 2));
-
-    d3.json("miserables.json", function(error, graph) {
-    if (error) throw error;
+    
+    d3.set(data)
 
     var link = svg.append("g")
         .attr("class", "links")
         .selectAll("line")
-        .data(graph.links)
+        .data(data.edges)
         .enter().append("line")
         .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
 
     var node = svg.append("g")
         .attr("class", "nodes")
         .selectAll("g")
-        .data(graph.nodes)
+        .data(data.nodes)
         .enter().append("g")
 
     var circles = node.append("circle")
@@ -324,11 +317,11 @@ function showGraph(data) {
         .text(function(d) { return d.id; });
 
     simulation
-        .nodes(graph.nodes)
+        .nodes(data.nodes)
         .on("tick", ticked);
 
     simulation.force("link")
-        .links(graph.links);
+        .links(data.edges);
 
     function ticked() {
         link
@@ -342,7 +335,6 @@ function showGraph(data) {
                 return "translate(" + d.x + "," + d.y + ")";
             })
         }
-    });
 
     function dragstarted(d) {
         if (!d3.event.active) simulation.alphaTarget(0.3).restart();

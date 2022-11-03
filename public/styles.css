@@ -22,15 +22,17 @@ h2 {
 input[type=text] {
   box-sizing: border-box;
   border: 2px solid rgb(14, 13, 13);
+  color: white;
+  font-family: Inter,Helvetica,"Apple Color Emoji","Segoe UI Emoji",NotoColorEmoji,"Noto Color Emoji","Segoe UI Symbol","Android Emoji",EmojiSymbols,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",sans-serif;
   border-radius: 4px;  
   margin-left: 10px;
 }
-
 
 .inputsearch{
   width: 90%;
   height: 200 px;
   background-image: url('/public/icons/query.png');
+  background-color: #2196F3;
   background-size: 64px 64px;
   background-position: 10px 10px; 
   background-repeat: no-repeat;

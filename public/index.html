@@ -18,23 +18,23 @@
             <option value="cited_by-Clin">Cited by-Clin</option>
         </select>
         <br>
+        <!-- Fileupload -->
         <label> Laden Sie ein Liste von PMIDs oder ein CSV hoch:</label> 
-        <form enctype="multipart/form-data" action="/upload/file" method="post">
-            <input id="fileInput" type="file" />
-        </form>
+        <p>
+            <input type="file" id="dateien" name="files[]" multiple />
+            <button id="btnsend" onclick="search()" class="button" role="button">Suchen</button>
+        </p>
     </head>
     <body>
         <br>
         <br>
         <label > Filter: </label> 
-
-        
         <div id="filterbtnContainer">
-            <button class="btnactive" onclick="onClickFilter()"> Alle Filter</button>
+            <button id="btnactive" class="btnf" onclick="onClickFilter()"> Alle Filter</button>
             <button class="btnf" id = "btndate" onclick="filterSelection('publikationszeitpunkt')"> Publikationszeitpunkt</button>
             <button class="btnf" id = "btnimp" onclick="filterSelection('impactfactor')"> Impact factor</button>
             <button class="btnf" id = "btnsprache" onclick="filterSelection('sprache')"> Sprache</button>
-            <button class="btnf" id = "btntext" onclick="filterSelection('textverfügbarkeit')">TextverfügbarkeitColors</button>
+            <button class="btnf" id = "btntext" onclick="filterSelection('textverfügbarkeit')">Textverfügbarkeit</button>
         </div> 
         <!-- The filterable elements. Note that some have multiple class names (this can be used if they belong to multiple categories) -->
         <div class="filtercontainer">
@@ -62,19 +62,16 @@
         <br>
         <br>
         <div id="dataviz_basicZoom" class="center">
-            <svg></svg>
         </div>
         <script src="https://d3js.org/d3.v4.min.js"></script>
         <h2>Resultate</h2> <label id="nresults" > </label>
-        <a id="a1" download="file.json"> Export result</a>
+        <a id="a1" download="graph.xml"> Export result</a>
         <ul id="output"></ul>
     </body>
     </html>
-    
     <script src="https://code.jquery.com/jquery-latest.min.js"></script>
     <script src="/src/script.js"></script>
     <script src="/src/xml2json.js"></script>
-
     <script>
 
     let input = document.querySelectorAll("input");
@@ -86,8 +83,8 @@
     //listens for you to press the ENTER key, at which point your web address will change to the one you have input in the search box
     if (e.keyCode == 13) {
         console.log();
-        document.getElementById("searchquery").innerHTML = e.target.value.toString();
         let res = search();
+        console.log("Result: ", res);
     }
 }
 
@@ -97,7 +94,6 @@
         document.getElementById("btnsprache").style.visibility = "visible";
         document.getElementById("btntext").style.visibility = "visible";
         filterSelection("all");
-        
     }
 
     function filterSelection(c) {
@@ -110,7 +106,6 @@
         if (x[i].className.indexOf(c) > -1) addFilter(x[i], "show");
     }
     }
-
     // Show filtered elements
     function addFilter(element, name) {
     let i, arr1, arr2;
@@ -122,7 +117,6 @@
         }
     }
     }
-
     // Hide elements that are not selected
     function removeFilter(element, name) {
         let i, arr1, arr2;
@@ -135,23 +129,42 @@
     }
     element.className = arr1.join(" ");
     }
-
-    
-
+    /*
     // Add active class to the current control button (highlight it)
-    let btnContainer = document.getElementById("btnactive");
-    if(btnContainer.getElementsByClassName("btnf") != null){
-        let btns = btnContainer.getElementsByClassName("btnf");
-    }
+    let btnContainer = document.getElementById("filterbtnContainer");
+    let btns = btnContainer.getElementsByClassName("btnf");
     for (let i = 0; i < btns.length; i++) {
-    btns[i].addEventListener("click", function() {
-        let current = document.getElementsByClassName("active");
-        current[0].className = current[0].className.replace(" active", "");
-        this.className += " active";
-    });
+        btns[i].addEventListener("click", function() {
+            let current = document.getElementsByClassName("active");
+            current[0].className = current[0].className.replace(" active", "");
+            this.className += " active";
+        });
+    }
+    */
+    function dateiauswahl(evt) {
+    // FileList-Objekt des input-Elements auslesen, auf dem 
+    // das change-Event ausgelöst wurde (event.target)
+    let files = evt.target.files; 
+
+    // Deklarierung eines Array Objekts mit Namen "fragmente". Hier werden die Bausteine
+    // für die erzeugte Listenausgabe gesammelt.
+    let fragmente = [];
+    // Zählschleife; bei jedem Durchgang den Namen, Typ und 
+    // die Dateigröße der ausgewählten Dateien zum Array hinzufügen
+    for (var i = 0, f; f = files[i]; i++) {
+        fragmente.push('<li><strong>', f.name, '</strong> (', f.type || 'n/a', ') - ',
+                    f.size, ' bytes</li>');
+    }
+        // Alle Fragmente im fragmente Array aneinanderhängen, in eine unsortierte Liste einbetten
+        // und das alles als HTML-Inhalt in das output-Elements mit id='dateiListe' einsetzen.
+        document.getElementById('dateiListe').innerHTML = '<ul>' + fragmente.join('') + '</ul>';
     }
 
-    
+    // UI-Events erst registrieren wenn das DOM bereit ist!
+    document.addEventListener("DOMContentLoaded", function() {
+        // Falls neue Eingabe, neuer Aufruf der Auswahlfunktion
+        document.getElementById('dateien').addEventListener('change', dateiauswahl, false);
+    });
   
     
 </script>
