@@ -18,7 +18,10 @@
             <option value="cited_by-Clin">Cited by-Clin</option>
         </select>
         <br>
-        <label> Laden Sie ein Liste von PMIDs oder ein CSV hoch:</label> <button class = "button" onClick="onClickHandler(event)">File upload</button>
+        <label> Laden Sie ein Liste von PMIDs oder ein CSV hoch:</label> 
+        <form enctype="multipart/form-data" action="/upload/file" method="post">
+            <input id="fileInput" type="file" />
+        </form>
     </head>
     <body>
         <br>
@@ -37,7 +40,7 @@
         <div class="filtercontainer">
             <input type="date" id="pubdate1" class="filterDiv publikationszeitpunkt">
             <input type="date" id="pubdate2" class="filterDiv publikationszeitpunkt">
-            <input type="text" id="pubdate1" class="filterDiv impactfactor" placeholder="Journals mit einem IF grösser als...">
+            <input type="text" id="if" class="filterDiv impactfactor" placeholder="Journals mit einem IF grösser als...">
             <select id="sprachen" name="sprachen" class="filterDiv sprache">
                 <option value="eng">Englisch</option>
                 <option value="ger">Deutsch</option>
@@ -85,9 +88,6 @@
         console.log();
         document.getElementById("searchquery").innerHTML = e.target.value.toString();
         let res = search();
-        convert2XML(res);
-        
-
     }
 }
 
@@ -147,12 +147,7 @@
     });
     }
 
-    function convert2XML(data){
-        // Create x2js instance with default config
-        var x2js = new X2JS();
-        var xmlAsStr = x2js.json2xml_str( data );
-
-        console.log("XML-Objext: ", xmlAsStr);
-    }
-
+    
+  
+    
 </script>

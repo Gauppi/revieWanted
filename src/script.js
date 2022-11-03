@@ -2,17 +2,20 @@
 //Listen für den späteren Gebrauch
 let pmidList = [];
 let sekList = [];
-const authorList = [];
-const citidList = [];
+let authorList = [];
+let citidList = [];
 let articles = [];
+let reviews = [];
 
-const nodes = [];
-const nodesdata = [];
-const childnodes = [];
-const edges = [];
+let nodes = [];
+let nodesdata = [];
+let childnodes = [];
+let edges = [];
 const citedby = [];
 
 const directedlinks = [];
+
+let revcnt = 0;
 
 
 async function search() {
@@ -29,20 +32,35 @@ async function search() {
 
         document.getElementById("searchquery").innerHTML = document.getElementById("sterm").value.toString();
         let searchString = '("video s"[All Fields] OR "videoed"[All Fields] OR "videotape recording"[MeSH Terms] OR ("videotape"[All Fields] AND "recording"[All Fields]) OR "videotape recording"[All Fields] OR "video"[All Fields] OR "videos"[All Fields]) AND ("game s"[All Fields] OR "games"[All Fields] OR "gaming"[All Fields]) AND ("addict"[All Fields] OR "addict s"[All Fields] OR "addicted"[All Fields] OR "addicting"[All Fields] OR "addiction s"[All Fields] OR "addictive"[All Fields] OR "addictiveness"[All Fields] OR "addictives"[All Fields] OR "addicts"[All Fields] OR "behavior, addictive"[MeSH Terms] OR ("behavior"[All Fields] AND "addictive"[All Fields]) OR "addictive behavior"[All Fields] OR "addiction"[All Fields] OR "addictions"[All Fields]) AND ("classification"[MeSH Terms] OR "classification"[All Fields] OR "systematic"[All Fields] OR "classification"[MeSH Subheading] OR "systematics"[All Fields] OR "systematical"[All Fields] OR "systematically"[All Fields] OR "systematisation"[All Fields] OR "systematise"[All Fields] OR "systematised"[All Fields] OR "systematization"[All Fields] OR "systematizations"[All Fields] OR "systematize"[All Fields] OR "systematized"[All Fields] OR "systematizes"[All Fields] OR "systematizing"[All Fields])' //'("tractor"[All Fields] OR "tractors"[All Fields]) AND ("accidence"[All Fields] OR "accident s"[All Fields] OR "accidents"[MeSH Terms] OR "accidents"[All Fields] OR "accident"[All Fields])'; // Get from Form
+        // Arrays zurücksetzen 
         pmidList = [];
+        nodes = [];
+        edges = [];
         sekList = [];
+        //PubMed Suche nach Searchterm
         let pubMedSearch = await searchPubMedData(searchString);
+        //Pubmed Daten extrahieren
         let pubMedData = await fetchPubMedData(pubMedSearch);
+        //PubMed Daten anzeigen
         renderPubMedDataAsList(pubMedData);
+        // Zitationen und Metadaten suchen anhand der PMID
         let iCiteData = await getICiteData(pubMedData.result.uids);
         console.log("PMID Liste zitierter Artikel:", sekList);
+        // Suche die Zitierungen von den Zitierungen
         let iCiteData2 = await getICiteData2(sekList);
+        // Zitationsdaten zusammenführen
         let data = combineData(iCiteData, iCiteData2);
+        // Ausgabe JSON und direkte Verbindungen (C1 zitiert A1 aus der PMIDliste)
         console.log("JSON created:",data);
         console.log("directed Links: ", directedlinks);
+        //Erstellen des force directed Graphes
         showGraph(JSON.parse(data));
-       OBJtoXML(data);
 
+        //XML Parsen 
+        let res = OBJtoXML(data);
+        console.log(res);
+
+        //Export result via Link
         const a1 = document.getElementById("a1");
         const file = new Blob([data], {type: "text/plain"})
         a1.href = URL.createObjectURL(file);
@@ -51,7 +69,6 @@ async function search() {
         console.log(e)
     }
 }
-
 
 async function searchPubMedData(searchString) {
     let data = await $.ajax({
@@ -134,9 +151,17 @@ async function getICiteData(pmidList) {
     console.log("getICiteData", data.data);
     data.data.forEach(article => {
         //console.log(article);
-        nodes.push({id : article.pmid,group: "1"});
+        if(article.is_research_article == "Yes"){
+            nodes.push({id : article.pmid,group: "0"});
+        }
+           
+        else {
+            console.log("Review found: ", article.pmid);
+            revcnt++;
+            nodes.push({id : article.pmid,group: "3"});
+        }        
         //Weitere Attribute mitgeben
-        nodesdata.push([{key : "n0"}]);
+        //nodesdata.push([{key : "n0"}]);
 
         //Überprüfung, ob die Referenzenliste leer ist
         if(article.cited_by.length != 0) {
@@ -146,10 +171,10 @@ async function getICiteData(pmidList) {
                 //citidList.push((article.cited_by[i]));
                 if(article.cited_by[i] != undefined){
                     if(pmidList.includes(article.cited_by[i].toString())){
-                        directedlinks.push({target : article.pmid, source : article.cited_by[i]});
+                        directedlinks.push({source : article.cited_by[i], target : article.pmid, type: "CITATION"});
                     }
                     nodes.push({id :  article.cited_by[i], group: "2"});
-                    edges.push({target: article.pmid, source: article.cited_by[i], value: 1});
+                    edges.push({target: article.pmid, source: article.cited_by[i], value: article.relative_citation_ratio});
                     citedby.push(article.pmid, article.cited_by[i]);
                     sekList.push(article.cited_by[i]);                      
                 }
@@ -158,6 +183,8 @@ async function getICiteData(pmidList) {
             
         }
     });
+
+    console.log("Reviews found: ", revcnt);
     console.log("Cited_by", citedby);
     console.log("Nodes created:", nodes);
     console.log("Edges created:", edges);
@@ -246,7 +273,7 @@ function showGraph(data) {
         }))
     .append("g")
 
-    var color = d3.scaleOrdinal(d3.schemeCategory20);
+    var color = d3.scaleOrdinal(d3.schemeCategory10);
 
     var simulation = d3.forceSimulation()
         .force("link", d3.forceLink().id(function(d) { return d.id; }))
@@ -270,8 +297,8 @@ function showGraph(data) {
         .enter().append("g")
 
     var circles = node.append("circle")
-        .attr("r", 5)
-        .attr("fill", function(d) { return color(d.group); });
+        .attr("r", 6)
+        .style("fill", function(d) { return color(d.group); });
 
     // Create a drag handler and append it to the node object instead
     var drag_handler = d3.drag()
