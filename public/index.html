@@ -136,9 +136,13 @@
     element.className = arr1.join(" ");
     }
 
+    
+
     // Add active class to the current control button (highlight it)
     let btnContainer = document.getElementById("btnactive");
-    let btns = btnContainer.getElementsByClassName("btnf");
+    if(btnContainer.getElementsByClassName("btnf") != null){
+        let btns = btnContainer.getElementsByClassName("btnf");
+    }
     for (let i = 0; i < btns.length; i++) {
     btns[i].addEventListener("click", function() {
         let current = document.getElementsByClassName("active");

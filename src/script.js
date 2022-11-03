@@ -54,7 +54,7 @@ async function search() {
         console.log("JSON created:",data);
         console.log("directed Links: ", directedlinks);
         //Erstellen des force directed Graphes
-        showGraph(JSON.parse(data));
+        showGraph(data);
 
         //XML Parsen 
         let res = OBJtoXML(data);
@@ -153,12 +153,14 @@ async function getICiteData(pmidList) {
         //console.log(article);
         if(article.is_research_article == "Yes"){
             nodes.push({id : article.pmid,group: "0"});
+            nodesdata.push({pmid : article.pmid, title: article.title, authors: article.authors, journal: article.journal, is_res_article: article.is_research_article, rcr: article.relative_citation_ratio, nih: article.nih_percentile, cit_count: article.citation_count});
         }
            
         else {
             console.log("Review found: ", article.pmid);
             revcnt++;
             nodes.push({id : article.pmid,group: "3"});
+            nodesdata.push({pmid : article.pmid, title: article.title, authors: article.authors, journal: article.journal, is_res_article: article.is_research_article, rcr: article.relative_citation_ratio, nih: article.nih_percentile, cit_count: article.citation_count});
         }        
         //Weitere Attribute mitgeben
         //nodesdata.push([{key : "n0"}]);
@@ -171,10 +173,12 @@ async function getICiteData(pmidList) {
                 //citidList.push((article.cited_by[i]));
                 if(article.cited_by[i] != undefined){
                     if(pmidList.includes(article.cited_by[i].toString())){
+                        console.log("Direkt Link found:")
                         directedlinks.push({source : article.cited_by[i], target : article.pmid, type: "CITATION"});
+                        nodes.push({id :  article.cited_by[i], group: "2"});
+                        edges.push({target: article.pmid, source: article.cited_by[i], value: article.relative_citation_ratio});
                     }
-                    nodes.push({id :  article.cited_by[i], group: "2"});
-                    edges.push({target: article.pmid, source: article.cited_by[i], value: article.relative_citation_ratio});
+                    
                     citedby.push(article.pmid, article.cited_by[i]);
                     sekList.push(article.cited_by[i]);                      
                 }
@@ -187,6 +191,7 @@ async function getICiteData(pmidList) {
     console.log("Reviews found: ", revcnt);
     console.log("Cited_by", citedby);
     console.log("Nodes created:", nodes);
+    console.log("Nodesdata: ", nodesdata);
     console.log("Edges created:", edges);
     return data;
 }

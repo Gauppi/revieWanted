@@ -22,13 +22,8 @@ h2 {
 input[type=text] {
   box-sizing: border-box;
   border: 2px solid rgb(14, 13, 13);
-  border-radius: 4px;
-  background-color: white;
-  
-  
-  
+  border-radius: 4px;  
   margin-left: 10px;
-
 }
 
 
@@ -104,7 +99,7 @@ input[type=text] {
   .center {
     margin: auto;
     width: 50%;
-    border: 3px solid rgb(0, 30, 128);
+    border: 3px solid rgb(33, 43, 77);
     padding: 10px;
   }
   
