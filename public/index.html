@@ -7,35 +7,42 @@
 
     <div>
         <img class="logo" src="logo.png">
-        <p> einfach Zitationen suchen </p>
-        <h1 id="searchquery"> Sie suchen nach: ....</h2>
+        <h1> einfach Zitationen suchen </h1>
+        <h3 id="searchquery"> Sie suchen nach: ....</h3>
     </div>
-
-    
-        <label for="graphbase">Wählen sie basierend auf welchen Zitationen der Graph erstellt wird:</label>
+        <label class="graphbase">Wählen sie basierend auf welchen Zitationen der Graph erstellt wird:</label>
         <select name="base" id="graphbase">
             <option value="cited_by">Cited by</option>
             <option value="cited_by-Clin">Cited by-Clin</option>
         </select>
         <br>
+        <br>
         <!-- Fileupload -->
-        <label> Laden Sie ein Liste von PMIDs oder ein CSV hoch:</label> 
+        <label> 1) Laden Sie ein Liste von PMIDs oder ein CSV hoch:</label> 
         <p>
             <input type="file" id="dateien" name="files[]" multiple />
-            <button id="btnsend" onclick="search()" class="button" role="button">Suchen</button>
+            <button id="btnsend" onclick="search()" class="buttonUpload" role="button">Suchen</button>
         </p>
     </head>
     <body>
         <br>
         <br>
-        <label > Filter: </label> 
+        <br>
+            <label>2) PubMed (Advanced) Searchquery: </label>
+        <br>
+            <input type="text" id="sterm" class="inputsearch" name="search" value="tractor accidents">
+            <button id="btnsend" onclick="search()" class="button" role="button">Suchen</button>
+        <br>
+        <br>
         <div id="filterbtnContainer">
+            <p > Filter: </p> 
             <button id="btnactive" class="btnf" onclick="onClickFilter()"> Alle Filter</button>
             <button class="btnf" id = "btndate" onclick="filterSelection('publikationszeitpunkt')"> Publikationszeitpunkt</button>
             <button class="btnf" id = "btnimp" onclick="filterSelection('impactfactor')"> Impact factor</button>
             <button class="btnf" id = "btnsprache" onclick="filterSelection('sprache')"> Sprache</button>
             <button class="btnf" id = "btntext" onclick="filterSelection('textverfügbarkeit')">Textverfügbarkeit</button>
         </div> 
+        <br>
         <!-- The filterable elements. Note that some have multiple class names (this can be used if they belong to multiple categories) -->
         <div class="filtercontainer">
             <input type="date" id="pubdate1" class="filterDiv publikationszeitpunkt">
@@ -52,20 +59,13 @@
                 <option value="full">full Text</option>
             </select>
         </div>
-        
         <br>
-        <br>
-        <label> PubMed (Advanced) Searchquery: </label>
-        <br>
-        <input type="text" id="sterm" class="inputsearch" name="search" value="tractor accidents">
-        <button id="btnsend" onclick="search()" class="button" role="button">Suchen</button>
-        <br>
-        <br>
-        <div id="dataviz_basicZoom" class="center">
+            <div id="dataviz_basicZoom" class="center">
         </div>
         <script src="https://d3js.org/d3.v4.min.js"></script>
-        <h2>Resultate</h2> <label id="nresults" > </label>
-        <a id="a1" download="graph.xml"> Export result</a>
+        <h2>Resultate</h2> 
+        <label id="nresults" > </label>
+        <a id="a1" download="graph.graphml"> Export result</a>
         <ul id="output"></ul>
     </body>
     </html>

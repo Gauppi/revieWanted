@@ -8,14 +8,18 @@ let articles = [];
 let reviews = [];
 
 let nodes = [];
-let nodesdata = [];
 let childnodes = [];
 let edges = [];
+let graphnodes = [];
+let graphedges = [];
 const citedby = [];
 
 const directedlinks = [];
 
-let revcnt = 0;
+
+//Counter Variablen für Citations und Reviews
+let cit_count = 0;
+let rev_count = 0;
 
 
 async function search() {
@@ -43,21 +47,25 @@ async function search() {
         let pubMedData = await fetchPubMedData(pubMedSearch);
         //PubMed Daten anzeigen
         renderPubMedDataAsList(pubMedData);
-        // Zitationen und Metadaten suchen anhand der PMID
+        // Zitationen und Metadaten suchen anhand der PMID (1. mal)
         let iCiteData = await getICiteData(pubMedData.result.uids);
         console.log("PMID Liste zitierter Artikel:", sekList);
-        // Suche die Zitierungen von den Zitierungen
+        // Suche die Zitierungen von den Zitierungen (2. mal)
         let iCiteData2 = await getICiteData2(sekList);
         // Zitationsdaten zusammenführen
         let data = combineData(iCiteData, iCiteData2);
         // Ausgabe JSON und direkte Verbindungen (C1 zitiert A1 aus der PMIDliste)
         console.log("JSON created:",data);
         console.log("directed Links: ", directedlinks);
+        //Resultat updaten Zitationenhinzufügen
+        const nres = document.getElementById("nresults");
+        nres.textContent = nres.textContent + " | Zitationen: " + cit_count + " | Reviews:" + rev_count;
         //Erstellen des force directed Graphes
         showGraph(data);
         
         //XML Parsen 
-        let res = OBJtoXML(data);
+        data = combineNodes(graphnodes, graphedges);
+        let res = xmltographml(OBJtoXML(data));
         console.log(res);
 
         //Export result via Link
@@ -121,19 +129,11 @@ function renderPubMedDataAsList(pubMedData) {
             href: "https://pubmed.ncbi.nlm.nih.gov/" +article.pmid,
             text: article.uid + " | " + article.title,
         }).appendTo(container);
-        //Autoren
-        /*
-        let authorJSON = JSON.stringify(article.authors);
-        let autoren = "";
-        if(article.authors > 0){
-            $.each(article.authors, function(i, author){
-                autoren += authorJSON.name[i] + ", ";
-            });
-        }
-        */
+        //First Author
         $('<div/>', {
             text: JSON.stringify(article.authors)
         }).appendTo(item);
+        
         //Trennlinie
         $('<hr width="98%" align="center" height="25px" background-color="blue">').appendTo(item);
     });
@@ -153,44 +153,46 @@ async function getICiteData(pmidList) {
         //console.log(article);
         if(article.is_research_article == "Yes"){
             nodes.push({id : article.pmid,group: "0"});
-            nodesdata.push({pmid : article.pmid, title: article.title, authors: article.authors, journal: article.journal, is_res_article: article.is_research_article, rcr: article.relative_citation_ratio, nih: article.nih_percentile, cit_count: article.citation_count});
+            graphnodes.push({node: {id : article.pmid , data: {key: "n1"}}});
+            //Weitere Attribute mitgeben
+            //nodesdata.push({pmid : article.pmid, title: article.title, authors: article.authors, journal: article.journal, is_res_article: article.is_research_article, rcr: article.relative_citation_ratio, nih: article.nih_percentile, cit_count: article.citation_count});
         }
            
         else {
             console.log("Review found: ", article.pmid);
-            revcnt++;
-            nodes.push({id : article.pmid,group: "3"});
-            nodesdata.push({pmid : article.pmid, title: article.title, authors: article.authors, journal: article.journal, is_res_article: article.is_research_article, rcr: article.relative_citation_ratio, nih: article.nih_percentile, cit_count: article.citation_count});
-        }        
-        //Weitere Attribute mitgeben
-        //nodesdata.push([{key : "n0"}]);
-
+            rev_count++;
+            nodes.push({id : article.pmid,group: "7"});
+            graphnodes.push({node: {id : article.pmid , data: {key: "n1"}}});
+            //Weitere Attribute mitgeben
+            //nodesdata.push({pmid : article.pmid, title: article.title, authors: article.authors, journal: article.journal, is_res_article: article.is_research_article, rcr: article.relative_citation_ratio, nih: article.nih_percentile, cit_count: article.citation_count});
+        }
         //Überprüfung, ob die Referenzenliste leer ist
         if(article.cited_by.length != 0) {
             
-            //Überprüfung, ob die PMID der Referenz undefiniert ist
-            for(i = 0; i <= article.cited_by.length; i++ ){
-                //citidList.push((article.cited_by[i]));
+            // Durch jede Zitation loopen, um die PMID aufzunehmen
+            for(i = 0; i < article.cited_by.length; i++ ){
+                cit_count++;
+                //Überprüfung, ob die PMID der Referenz undefiniert ist
                 if(article.cited_by[i] != undefined){
                     if(pmidList.includes(article.cited_by[i].toString())){
-                        console.log("Direkt Link found:")
+                        console.log("Direkt Link found: gegenseitige Zitation gefunden")
                         directedlinks.push({source : article.cited_by[i], target : article.pmid, type: "CITATION"});
-                        nodes.push({id :  article.cited_by[i], group: "2"});
-                        edges.push({target: article.pmid, source: article.cited_by[i], value: article.relative_citation_ratio});
+                        //Zitationsknoten einblenden, falls gewünscht
+                        //nodes.push({id :  article.cited_by[i], group: "1"});
+                        edges.push({target: article.pmid, source: article.cited_by[i], value: article.relative_citation_ratio,  type: "CITATION"});
+                        graphedges.push({edge: {target: article.pmid, source: article.cited_by[i], value: article.relative_citation_ratio,  type: "CITATION", data: {key: "e1"}}});
                     }
-                    
                     citedby.push(article.pmid, article.cited_by[i]);
                     sekList.push(article.cited_by[i]);                      
                 }
                     
             }
-            
         }
     });
-    console.log("Reviews found: ", revcnt);
+
+    console.log("Reviews found: ", rev_count);
     console.log("Cited_by", citedby);
     console.log("Nodes created:", nodes);
-    console.log("Nodesdata: ", nodesdata);
     console.log("Edges created:", edges);
     return data;
 }
@@ -202,6 +204,14 @@ function combineData(pubData, iCiteData){
         edges: edges
     }
     return data
+}
+
+function combineNodes(nodes, nodesdata){
+    const data = {
+        node: graphnodes,
+        edge: graphedges
+    }
+    return data;
 }
 
 
@@ -247,15 +257,31 @@ function OBJtoXML(obj) {
       } else {
         xml += obj[prop];
       }
-      xml += obj[prop] instanceof Array ? '' : "</" + prop + ">";
+      xml += obj[prop] instanceof Array ? '' : "</" + prop + ">" + '\n';
     }
     xml = xml.replace(/<\/?[0-9]{1,}>/g, '');
     return xml
 }
+    
+function xmltographml(obj){
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<graphml xmlns="http://graphml.graphdrawing.org/xmlns"\n' +
+    'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\n' +
+    'xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns\n' +
+    'http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">\n' +
+    '<key id="e1" for="edge" attr.name="weight" attr.type="double">\n'+
+    '<default>1</default></key>\n' +
+    '<key id="n1" for="node" attr.name="articles" attr.type="double">\n' +
+    '<default>1</default></key>\n' +
+    '<graph edgedefault="undirected">\n' + 
+    obj + '\n' + 
+    ' </graphml>';
+    
+}
 
 function save(xml){
     let gephiXML = new gephiXML([xml], {type: "text/xml"});
-    saveAs(gephiXML, "gephiXML.xml");
+    saveAs(gephiXML, "graph.graphml");
 }
 
 function showGraph(data) {    
@@ -265,7 +291,7 @@ function showGraph(data) {
 
     var svg = d3.select("#dataviz_basicZoom")
     .append("svg")
-        .attr("width",  800)
+        .attr("width",  1200)
         .attr("height",  1000)
         .call(d3.zoom().on("zoom", function () {
         svg.attr("transform", d3.event.transform)
