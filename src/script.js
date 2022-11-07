@@ -127,7 +127,7 @@ function renderPubMedDataAsList(pubMedData) {
         }).appendTo(item);
         //PMID +Titel + Link zum Artikel
         $('<a/>', {
-            href: "https://pubmed.ncbi.nlm.nih.gov/" +article.pmid,
+            href: "https://pubmed.ncbi.nlm.nih.gov/" +article.uid,
             text: article.uid + " | " + article.title,
         }).appendTo(container);
         //First Author

@@ -12,7 +12,7 @@
     <!-- Fileupload -->
     
     <p>
-        <label> 1) Laden Sie ein Liste von PMIDs oder ein CSV hoch:</label>
+        <label> a) Laden Sie ein Liste von PMIDs oder ein CSV hoch:</label>
         <br>
         <input type="file" id="dateien" name="files[]" multiple />
         <button id="btnsend" onclick="search()" class="buttonUpload" role="button">Suchen</button>
@@ -21,7 +21,7 @@
     <body>
         <br>
         <br>
-            <label>2) PubMed (Advanced) Searchquery: </label>
+            <label>b) PubMed (Advanced) Searchquery: </label>
         <br>
             <input type="text" id="sterm" class="inputsearch" name="search" value="tractor accidents">
             <button id="btnsend" onclick="search()" class="buttonupdata" role="button">Suchen</button>
@@ -91,8 +91,9 @@
         </div>
         <script src="https://d3js.org/d3.v4.min.js"></script>
         <h2 class="center">Resultate</h2> 
+        <br>
         <label id="nresults"> ...</label>
-        
+        <br>
         <ul id="output"></ul>
     </body>
     </html>
