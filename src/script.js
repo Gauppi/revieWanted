@@ -59,13 +59,14 @@ async function search() {
         console.log("directed Links: ", directedlinks);
         //Resultat updaten Zitationenhinzufügen
         const nres = document.getElementById("nresults");
-        nres.textContent = nres.textContent + " | Zitationen: " + cit_count + " | Reviews:" + rev_count;
+        nres.textContent = nres.textContent + " | Zitationen: " + cit_count + " | Reviews (Orange):" + rev_count;
         //Erstellen des force directed Graphes
         showGraph(data);
         
         //XML Parsen 
         data = combineNodes(graphnodes, graphedges);
         let res = xmltographml(OBJtoXML(data));
+        //let res = xmltographml(OBJtoXML(data));
         console.log(res);
 
         //Export result via Link
@@ -93,7 +94,7 @@ async function searchPubMedData(searchString) {
     console.log("searchPubMedData", data);
     //pmidList =  data.esearchresult.idlist;
     const nres = document.getElementById("nresults");
-    nres.textContent = data.esearchresult.count.toString() + " Artikel gefunden:";
+    nres.textContent = data.esearchresult.count.toString() + " Artikel (blau) gefunden:";
     return data;
 }
 
@@ -153,7 +154,7 @@ async function getICiteData(pmidList) {
         //console.log(article);
         if(article.is_research_article == "Yes"){
             nodes.push({id : article.pmid,group: "0"});
-            graphnodes.push({node: {id : article.pmid , data: {key: "n1"}}});
+            graphnodes.push({id : article.pmid , data: {key: "n1"}});
             //Weitere Attribute mitgeben
             //nodesdata.push({pmid : article.pmid, title: article.title, authors: article.authors, journal: article.journal, is_res_article: article.is_research_article, rcr: article.relative_citation_ratio, nih: article.nih_percentile, cit_count: article.citation_count});
         }
@@ -161,8 +162,9 @@ async function getICiteData(pmidList) {
         else {
             console.log("Review found: ", article.pmid);
             rev_count++;
-            nodes.push({id : article.pmid,group: "7"});
-            graphnodes.push({node: {id : article.pmid , data: {key: "n1"}}});
+            //Im Graphen orange
+            nodes.push({id : article.pmid,group: "1"});
+            graphnodes.push({id : article.pmid , data: {key: "n1"}});
             //Weitere Attribute mitgeben
             //nodesdata.push({pmid : article.pmid, title: article.title, authors: article.authors, journal: article.journal, is_res_article: article.is_research_article, rcr: article.relative_citation_ratio, nih: article.nih_percentile, cit_count: article.citation_count});
         }
@@ -177,13 +179,16 @@ async function getICiteData(pmidList) {
                     if(pmidList.includes(article.cited_by[i].toString())){
                         console.log("Direkt Link found: gegenseitige Zitation gefunden")
                         directedlinks.push({source : article.cited_by[i], target : article.pmid, type: "CITATION"});
-                        //Zitationsknoten einblenden, falls gewünscht
-                        //nodes.push({id :  article.cited_by[i], group: "1"});
                         edges.push({target: article.pmid, source: article.cited_by[i], value: article.relative_citation_ratio,  type: "CITATION"});
-                        graphedges.push({edge: {target: article.pmid, source: article.cited_by[i], value: article.relative_citation_ratio,  type: "CITATION", data: {key: "e1"}}});
+                        graphedges.push({id: cit_count, target: article.pmid, source: article.cited_by[i], value: article.relative_citation_ratio,  type: "CITATION", data: {key: "e1"}});
                     }
-                    citedby.push(article.pmid, article.cited_by[i]);
-                    sekList.push(article.cited_by[i]);                      
+                    else{
+                        //Zitationsknoten einblenden, falls gewünscht
+                        //nodes.push({id :  article.cited_by[i], group: "2"});
+                        citedby.push(article.pmid, article.cited_by[i]);
+                        sekList.push(article.cited_by[i]);  
+                    }
+                                        
                 }
                     
             }
@@ -214,6 +219,17 @@ function combineNodes(nodes, nodesdata){
     return data;
 }
 
+/*
+function createGraph(nodes, nodesdata){
+    const graph = {
+        
+            nodes : {node : { _id : nodes.id, _key: "n1", _type: nodes.type, _attributes: nodesdata}},
+            edges : {edge : {_id: edges.is, _key: "e1", _source: edges.source, _target: edges.target}}
+    }
+    console.log(graph);
+    return graph;
+}
+*/
 
 function sliceIntoChunks(arr, chunkSize) {
     const res = [];
@@ -275,8 +291,24 @@ function xmltographml(obj){
     '<default>1</default></key>\n' +
     '<graph edgedefault="undirected">\n' + 
     obj + '\n' + 
-    ' </graphml>';
+    '</graph></graphml>';
     
+}
+
+//Funktioniert noch nicht
+function xmlParser(xml){
+    parser = new DOMParser();
+    xmlDoc = parser.parseFromString(xml,"text/xml");
+    let xmlstr = "";
+    x = xmlDoc.getElementsByTagName("node");
+    for(i = 0; i < x.length; i++) {
+        xmlstr += "< " + "id =" + x[i].childNodes[0].nodeValue +"> <br>"+ '<data> key = "n1" </data>' + "<br> </node> <br>";
+    }
+    y = xmlDoc.getElementsByTagName("edge");
+    for(j = 0; j < x.length; j++) {
+        xmlstr += "< " + "id =" + y[j].childNodes[0].nodeValue +"> <br>"+ '<data> key = "e1" </data>' + "<br> </edge> <br>";
+    }
+    return xmlstr;
 }
 
 function save(xml){

@@ -12,11 +12,22 @@ h2 {
   color: rgb(0, 0, 0);
   text-decoration-line: underline;
   text-decoration-color: white;
-  margin-left: 10px;
   font-family: Inter,Helvetica,"Apple Color Emoji","Segoe UI Emoji",NotoColorEmoji,"Noto Color Emoji","Segoe UI Symbol","Android Emoji",EmojiSymbols,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",sans-serif;
   font-size: 32px;
   font-weight: 100;
   line-height: 24px
+}
+
+img {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+.center {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 input[type=text] {
@@ -32,56 +43,21 @@ input[type=text] {
   width: 90%;
   height: 200 px;
   background-image: url('/public/icons/query.png');
-  background-color: #2196F3;
+  background-color: white;
   background-size: 64px 64px;
   background-position: 10px 10px; 
   background-repeat: no-repeat;
-  padding: 24px 80px 24px 80px;
+  padding: 20px 80px 24px 80px;
+  
   font-size: 32px;
   font-family: sans-serif;
   font-weight: 300;
 }
 
-.filtercontainer {
-    overflow: hidden;
-  }
-  
-  .filterDiv {
-    float: left;
-    background-color: #2196F3;
-    color: #ffffff;
-    width: 220px;
-    line-height: 50px;
-    text-align: center;
-    margin: 2px;
-    display: none; /* Hidden by default */
-  }
-  
-  /* The "show" class is added to the filtered elements */
-  .show {
-    display: block;
-  }
-  
-  /* Style the buttons */
-  .btnf {
-    border: none;
-    outline: none;
-    padding: 12px 16px;
-    background-color: #f1f1f1;
-    cursor: pointer;
+#dateien {
+  padding-left: 20px;
+}
 
-  }
-  
-  /* Add a light grey background on mouse-over */
-  .btnf:hover {
-    background-color: #ddd;
-  }
-  
-  /* Add a dark background to the active button */
-  .btnf.active {
-    background-color: #666;
-    color: white;
-  }
 
   .links line {
     stroke: #999;
@@ -105,7 +81,7 @@ input[type=text] {
     padding: 10px;
   }
   
-  .button {
+  .buttonupdata {
     background: rgb(0, 30, 128);
     border-radius: 999px;
     box-shadow: #5E5DF0 0 10px 20px -10px;
@@ -163,3 +139,92 @@ input[type=text] {
     font-weight: 100;
     line-height: 24px;
   }
+
+  ul {
+    list-style: none;
+}
+
+label {
+    margin-top: 10px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+ul, li {
+    margin: 0;
+    padding: 0;
+    background-color: white;
+}
+
+li {
+    padding: 0.5em;
+}
+
+.filters {
+    width: 420px;
+    box-shadow: 0 0 0.5em 0 rgba(0,0,0,0.3);
+    padding: 0.1em;
+    position: absolute;
+}
+
+.filters__list li {
+    display: flex;
+    align-items: center;
+    user-select: none;
+    padding-bottom: 1em;
+    line-height: 0;
+}
+
+.filters__list li:last-child {
+  padding-bottom: 0;
+}
+
+input[type="checkbox"] {
+    width: 40px;
+    height: 40px;
+    margin-right: 0.5em;
+}
+
+.filters:not(.filters--active) {
+    display: none;
+}
+
+.btn_fi_send {
+    background: rgb(7, 37, 118);
+    padding: 1.5em 2em;
+    margin-left: 20px;
+    text-transform: uppercase;
+    color: #f5f5f5;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    border: 0;
+    outline: 0;
+    text-align: left;
+}
+
+.button {
+    background: rgb(7, 37, 118);
+    padding: 1em 2em;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    border: 0;
+    outline: 0;
+    text-align: left;
+    min-width: 150px;
+    min-height: 80px;
+    display: inline-flex;
+    justify-content: space-between;
+    color: #f5f5f5;
+    cursor: pointer;
+}
+
+.button::after {
+    font-family: sans-serif;
+    content: "▼";
+    padding-left: 0.5em;
+}
+
+.button--highlight::after {
+    content: "✓";
+}

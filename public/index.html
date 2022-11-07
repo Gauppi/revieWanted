@@ -3,69 +3,96 @@
     <head>
         <link rel="stylesheet" href="styles.css">
         <title>Small World finder</title>
-
-
     <div>
         <img class="logo" src="logo.png">
-        <h1> einfach Zitationen suchen </h1>
-        <h3 id="searchquery"> Sie suchen nach: ....</h3>
     </div>
-        <label class="graphbase">Wählen sie basierend auf welchen Zitationen der Graph erstellt wird:</label>
-        <select name="base" id="graphbase">
-            <option value="cited_by">Cited by</option>
-            <option value="cited_by-Clin">Cited by-Clin</option>
-        </select>
+    <h4 class="center"> einfach Zitationen suchen </h4>
+    <p>RevieWanted ist ein Tool, welches Forschern das mühsame Suchen von zitierten Artikel erleichtert. Als Vorbereitung setzt die Webseite eine Liste von Artikel (PMIDs) oder einen gewünschten Scuhterm (Advanced PubMed Query)</p>
+    <br>
+    <!-- Fileupload -->
+    
+    <p>
+        <label> 1) Laden Sie ein Liste von PMIDs oder ein CSV hoch:</label>
         <br>
-        <br>
-        <!-- Fileupload -->
-        <label> 1) Laden Sie ein Liste von PMIDs oder ein CSV hoch:</label> 
-        <p>
-            <input type="file" id="dateien" name="files[]" multiple />
-            <button id="btnsend" onclick="search()" class="buttonUpload" role="button">Suchen</button>
-        </p>
+        <input type="file" id="dateien" name="files[]" multiple />
+        <button id="btnsend" onclick="search()" class="buttonUpload" role="button">Suchen</button>
+    </p>
     </head>
     <body>
-        <br>
         <br>
         <br>
             <label>2) PubMed (Advanced) Searchquery: </label>
         <br>
             <input type="text" id="sterm" class="inputsearch" name="search" value="tractor accidents">
-            <button id="btnsend" onclick="search()" class="button" role="button">Suchen</button>
+            <button id="btnsend" onclick="search()" class="buttonupdata" role="button">Suchen</button>
         <br>
         <br>
-        <div id="filterbtnContainer">
-            <p > Filter: </p> 
-            <button id="btnactive" class="btnf" onclick="onClickFilter()"> Alle Filter</button>
-            <button class="btnf" id = "btndate" onclick="filterSelection('publikationszeitpunkt')"> Publikationszeitpunkt</button>
-            <button class="btnf" id = "btnimp" onclick="filterSelection('impactfactor')"> Impact factor</button>
-            <button class="btnf" id = "btnsprache" onclick="filterSelection('sprache')"> Sprache</button>
-            <button class="btnf" id = "btntext" onclick="filterSelection('textverfügbarkeit')">Textverfügbarkeit</button>
-        </div> 
-        <br>
-        <!-- The filterable elements. Note that some have multiple class names (this can be used if they belong to multiple categories) -->
-        <div class="filtercontainer">
-            <input type="date" id="pubdate1" class="filterDiv publikationszeitpunkt">
-            <input type="date" id="pubdate2" class="filterDiv publikationszeitpunkt">
-            <input type="text" id="if" class="filterDiv impactfactor" placeholder="Journals mit einem IF grösser als...">
-            <select id="sprachen" name="sprachen" class="filterDiv sprache">
-                <option value="eng">Englisch</option>
-                <option value="ger">Deutsch</option>
-                <option value="fr">Französisch</option>
-                <option value="lat.">Lateinisch</option>
-            </select>
-            <select id="textavail" name="availability" class="filterDiv textverfügbarkeit">
-                <option value="abstract">Abstract</option>
-                <option value="full">full Text</option>
-            </select>
-        </div>
+        <button id="filter-button" class="btn_fi_send">Attribute</button>
+        <!-- Filter (Parameter) Button -->
+        <div id="filter-container" class="filters">
+           <ul class="filters__list">
+               <li>
+                   <input id="f1" type="checkbox" />
+                   <label for="f1">PMID</label>
+               </li>
+               <li>
+                   <input id="f2" type="checkbox" />
+                   <label for="f2">Autoren</label>
+               </li>
+               <li>
+                   <input id="f3" type="checkbox" />
+                   <label for="f3">Journal</label>
+               </li>
+               <li>
+                   <input id="f4" type="checkbox" />
+                   <label for="f4">is_research_art</label>
+                </li>
+                <li>
+                    <input id="f5" type="checkbox" />
+                    <label for="f5">rCr</label>
+                </li>
+                <li>
+                    <input id="f6" type="checkbox" />
+                    <label for="f6">nih percentile</label>
+                </li>
+                <li>
+                    <input id="f7" type="checkbox" />
+                    <label for="f7">animal</label>
+                </li><li>
+                    <input id="f8" type="checkbox" />
+                    <label for="f8">citation count</label>
+                </li>
+                <li>
+                    <input id="f9" type="checkbox" />
+                    <label for="f9">expected citations / year</label>
+                </li>
+                <li>
+                    <input id="f10" type="checkbox" />
+                    <label for="f10">field citation rate</label>
+                </li>
+                <li>
+                    <input id="f11" type="checkbox" />
+                    <label for="f11">cited by clin</label>
+                </li>
+                <li>
+                    <input id="f11" type="checkbox" />
+                    <label for="f11">cited by</label>
+                </li>
+                <li>
+                    <input id="f12" type="checkbox" />
+                    <label for="f12">references</label>
+                </li>
+           </ul>
+       </div>
+       <a id="a1" download="graph.graphml"> Export result</a>         
+        <h3 id="searchquery" class="center"> Sie suchen nach: ....</h3>
         <br>
             <div id="dataviz_basicZoom" class="center">
         </div>
         <script src="https://d3js.org/d3.v4.min.js"></script>
-        <h2>Resultate</h2> 
-        <label id="nresults" > </label>
-        <a id="a1" download="graph.graphml"> Export result</a>
+        <h2 class="center">Resultate</h2> 
+        <label id="nresults"> ...</label>
+        
         <ul id="output"></ul>
     </body>
     </html>
@@ -73,7 +100,8 @@
     <script src="/src/script.js"></script>
     <script src="/src/xml2json.js"></script>
     <script>
-
+    let button = document.getElementById("filter-button");
+    let container = document.getElementById("filter-container");
     let input = document.querySelectorAll("input");
 
     //Erstelle ein Eventlistener für eine Taste (gedrückt)
@@ -85,62 +113,50 @@
         console.log();
         let res = search();
         console.log("Result: ", res);
-    }
-}
-
-    function onClickFilter(){
-        document.getElementById("btndate").style.visibility = "visible";
-        document.getElementById("btnimp").style.visibility = "visible";
-        document.getElementById("btnsprache").style.visibility = "visible";
-        document.getElementById("btntext").style.visibility = "visible";
-        filterSelection("all");
-    }
-
-    function filterSelection(c) {
-    let x, i;
-    x = document.getElementsByClassName("filterDiv");
-    if (c == "all") c = "";
-    // Add the "show" class (display:block) to the filtered elements, and remove the "show" class from the elements that are not selected
-    for (i = 0; i < x.length; i++) {
-        removeFilter(x[i], "show");
-        if (x[i].className.indexOf(c) > -1) addFilter(x[i], "show");
-    }
-    }
-    // Show filtered elements
-    function addFilter(element, name) {
-    let i, arr1, arr2;
-    arr1 = element.className.split(" ");
-    arr2 = name.split(" ");
-    for (i = 0; i < arr2.length; i++) {
-        if (arr1.indexOf(arr2[i]) == -1) {
-        element.className += " " + arr2[i];
         }
     }
-    }
-    // Hide elements that are not selected
-    function removeFilter(element, name) {
-        let i, arr1, arr2;
-    arr1 = element.className.split(" ");
-    arr2 = name.split(" ");
-    for (i = 0; i < arr2.length; i++) {
-        while (arr1.indexOf(arr2[i]) > -1) {
-        arr1.splice(arr1.indexOf(arr2[i]), 1);
+
+    //Filter funktionen
+    button.onclick = function (e) {
+        e.stopPropagation();
+        if (container.classList.contains("filters--active")) {
+        container.classList.remove("filters--active");
+        } else {
+        container.classList.add("filters--active");
         }
+    };
+
+    container.onclick = function (e) {
+        e.stopPropagation();
+    };
+
+    window.onclick = function () {
+        container.classList.remove("filters--active");
+    };
+
+    console.log(input);
+
+    for (var i = 0; i < input.length; i++) {
+        var currentInput = input[i];
+
+        currentInput.onclick = function () {
+        var isChecked = false;
+        for (var j = 0; j < input.length; j++) {
+            if (input[j].checked) {
+            isChecked = true;
+            break;
+            }
+        }
+
+        if (isChecked) {
+            button.classList.add("button--highlight");
+        } else {
+            button.classList.remove("button--highlight");
+        }
+        };
     }
-    element.className = arr1.join(" ");
-    }
-    /*
-    // Add active class to the current control button (highlight it)
-    let btnContainer = document.getElementById("filterbtnContainer");
-    let btns = btnContainer.getElementsByClassName("btnf");
-    for (let i = 0; i < btns.length; i++) {
-        btns[i].addEventListener("click", function() {
-            let current = document.getElementsByClassName("active");
-            current[0].className = current[0].className.replace(" active", "");
-            this.className += " active";
-        });
-    }
-    */
+
+
     function dateiauswahl(evt) {
     // FileList-Objekt des input-Elements auslesen, auf dem 
     // das change-Event ausgelöst wurde (event.target)
