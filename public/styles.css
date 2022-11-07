@@ -33,7 +33,7 @@ img {
 input[type=text] {
   box-sizing: border-box;
   border: 2px solid rgb(14, 13, 13);
-  color: white;
+  color: black;
   font-family: Inter,Helvetica,"Apple Color Emoji","Segoe UI Emoji",NotoColorEmoji,"Noto Color Emoji","Segoe UI Symbol","Android Emoji",EmojiSymbols,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",sans-serif;
   border-radius: 4px;  
   margin-left: 10px;
@@ -227,4 +227,13 @@ input[type="checkbox"] {
 
 .button--highlight::after {
     content: "✓";
+}
+
+.filter-btn {
+  background: rgb(7, 37, 118);
+  margin: 5px 5px;
+  min-width: 70px;
+  height: 50px;
+  font-weight: 600;
+  color: #f5f5f5;
 }

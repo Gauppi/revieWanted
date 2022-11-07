@@ -23,9 +23,10 @@
         <br>
             <label>b) PubMed (Advanced) Searchquery: </label>
         <br>
-            <input type="text" id="sterm" class="inputsearch" name="search" value="tractor accidents">
+        <div>
+            <input type="text" id="sterm" class="inputsearch" name="search" value="tractor accidents"/>
             <button id="btnsend" onclick="search()" class="buttonupdata" role="button">Suchen</button>
-        <br>
+        </div>
         <br>
         <button id="filter-button" class="btn_fi_send">Attribute</button>
         <!-- Filter (Parameter) Button -->
@@ -82,6 +83,10 @@
                     <input id="f12" type="checkbox" />
                     <label for="f12">references</label>
                 </li>
+                <li>
+                    <button id="applyfilter" class="filter-btn"> Filter anwenden</button> 
+                    <button id="resetfilter" class="filter-btn"> Filter zurücksetzen</button>   
+                </li>
            </ul>
        </div>
        <a id="a1" download="graph.graphml"> Export result</a>         
@@ -90,9 +95,11 @@
             <div id="dataviz_basicZoom" class="center">
         </div>
         <script src="https://d3js.org/d3.v4.min.js"></script>
-        <h2 class="center">Resultate</h2> 
-        <br>
-        <label id="nresults"> ...</label>
+        <p>
+            <h2 class="center" id="nresults">Resultate:</h2> 
+            
+        </p>
+        
         <br>
         <ul id="output"></ul>
     </body>

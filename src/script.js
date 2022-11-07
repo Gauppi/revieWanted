@@ -39,7 +39,9 @@ async function search() {
         // Arrays zurücksetzen 
         pmidList = [];
         nodes = [];
+        graphnodes = [];
         edges = [];
+        graphedges = [];
         sekList = [];
         //PubMed Suche nach Searchterm
         let pubMedSearch = await searchPubMedData(searchString);
@@ -94,7 +96,7 @@ async function searchPubMedData(searchString) {
     console.log("searchPubMedData", data);
     //pmidList =  data.esearchresult.idlist;
     const nres = document.getElementById("nresults");
-    nres.textContent = data.esearchresult.count.toString() + " Artikel (blau) gefunden:";
+    nres.textContent += " " + data.esearchresult.count.toString() + " Artikel (blau) gefunden:";
     return data;
 }
 
@@ -184,7 +186,7 @@ async function getICiteData(pmidList) {
                     }
                     else{
                         //Zitationsknoten einblenden, falls gewünscht
-                        //nodes.push({id :  article.cited_by[i], group: "2"});
+                        //nodes.push({id :  article.cited_by[i], group: "5"});
                         citedby.push(article.pmid, article.cited_by[i]);
                         sekList.push(article.cited_by[i]);  
                     }
