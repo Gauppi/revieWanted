@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" href="styles.css">
+        <link rel="stylesheet" href="/public/styles.css">
         <title>Small World finder</title>
     <div>
-        <img class="logo" src="logo.png">
+        <img class="logo" src="/public/logo.png">
     </div>
     <h4 class="center"> einfach Zitationen suchen </h4>
     <p>RevieWanted ist ein Tool, welches Forschern das mühsame Suchen von zitierten Artikel erleichtert. Als Vorbereitung setzt die Webseite eine Liste von Artikel (PMIDs) oder einen gewünschten Scuhterm (Advanced PubMed Query)</p>
@@ -84,8 +84,8 @@
                     <label for="f12">references</label>
                 </li>
                 <li>
-                    <button id="applyfilter" class="filter-btn"> Filter anwenden</button> 
-                    <button id="resetfilter" class="filter-btn"> Filter zurücksetzen</button>   
+                    <button id="applyfilter" class="filter-btn"> Attribute setzten</button> 
+                    <button id="resetfilter" class="filter-btn"> Auswahl zurücksetzen</button>   
                 </li>
            </ul>
        </div>
@@ -124,7 +124,7 @@
         }
     }
 
-    //Filter funktionen
+    //Attribut-Auswahl-Funktionen
     button.onclick = function (e) {
         e.stopPropagation();
         if (container.classList.contains("filters--active")) {
@@ -164,7 +164,6 @@
         };
     }
 
-
     function dateiauswahl(evt) {
     // FileList-Objekt des input-Elements auslesen, auf dem 
     // das change-Event ausgelöst wurde (event.target)
@@ -189,6 +188,4 @@
         // Falls neue Eingabe, neuer Aufruf der Auswahlfunktion
         document.getElementById('dateien').addEventListener('change', dateiauswahl, false);
     });
-  
-    
 </script>
