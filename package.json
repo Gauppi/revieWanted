@@ -1,5 +1,18 @@
 {
-  "dependencies": {
-    "cors": "^2.8.5"
-  }
+  "name": "vizart",
+  "version": "1.0.0",
+  "description": "package for the project",
+  "main": "yes",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.ti.bfh.ch/gaupa1/revieWanted.git"
+  },
+  "author": "david gaupp",
+  "license": "ISC"
 }
